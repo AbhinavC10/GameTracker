@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: #1e1e1e;
+            color: #ffcc00;
+            padding: 1rem;
+            text-align: center;
+            font-size: 1.8rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        }
+        .filters {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 1.5rem;
+            flex-wrap: wrap;
+            background: #2a2a2a;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            margin: 1.5rem auto;
+            max-width: 80%;
+        }
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: nowrap;
+        }
+        .game-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 1rem;
+        }
+        .game-card {
+            background: #252525;
+            padding: 12px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.1);
+            width: 220px;
+            text-align: center;
+            transition: transform 0.3s ease-in-out;
+            overflow: hidden;
+        }
+        .game-card:hover {
+            transform: scale(1.05);
+        }
+        .game-card img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        .platform-logo {
+            width: 35px !important;
+            height: 33px !important;
+            object-fit: contain;
+            margin-top: 10px;
+        }
+        input, select {
+            padding: 10px;
+            border-radius: 8px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            width: 200px;
+            transition: all 0.3s;
+        }
+        input:focus, select:focus {
+            border-color: #ffcc00;
+            outline: none;
+        }
+        .filter-item input, .filter-item select {
+            width: 220px;
+        }
+        .filter-item label {
+            color: #ccc;
+            font-size: 0.9rem;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Game Tracker</h1>
+    </header>
+    <main>
+        <div class="filters">
+            <div class="filter-item">
+                <label for="search">Search:</label>
+                <input type="text" id="search" placeholder="Search games...">
+            </div>
+            <div class="filter-item">
+                <label for="platform-filter">Platform:</label>
+                <select id="platform-filter">
+                    <option value="">All Platforms</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <label for="status-filter">Status:</label>
+                <select id="status-filter">
+                    <option value="">All Status</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Ongoing">Ongoing</option>
+                    <option value="Not Started">Not Started</option>
+                </select>
+            </div>
+        </div>
+        <div id="game-list" class="game-list"></div>
+    </main>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const platformLogos = {
+                "Xbox": "https://th.bing.com/th/id/OIP.QYCkgA1sGtLaUmERoajEwQHaHa?rs=1&pid=ImgDetMain",
+                "EA": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKkBGqjpd6320pOoTUagLzuuonCmguCEDPiA&s",
+                "Steam": "https://static.vecteezy.com/system/resources/previews/020/336/432/non_2x/steam-logo-steam-icon-free-free-vector.jpg",
+                "Epic": "https://logos-world.net/wp-content/uploads/2021/12/Epic-Games-Emblem.png",
+                "Emulated": "https://cdn-icons-png.flaticon.com/512/8237/8237266.png",
+                "N": "https://png.pngtree.com/png-clipart/20210330/ourlarge/pngtree-pirate-game-icon-png-image_3170763.jpg"
+            };
+
+            function handleImageError(img) {
+                img.onerror = null;
+                img.style.display = 'none';
+                return true;
+            }
+
+            async function fetchGames() {
+                try {
+                    const response = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vS1kxT8zevrvrG_Xr7HarWj40Xj4kE_nSfMa6nJpO7cWDs8TTTWIHkQZ0UuDJkP7HVOQPQOb95aV7_v/pub?output=csv");
+                    const csvText = await response.text();
+                    const games = parseCSV(csvText);
+                    populatePlatformFilter(games);
+                    displayGames(games);
+                } catch (error) {
+                    console.error("Error fetching games:", error);
+                }
+            }
+
+            function parseCSV(csvText) {
+                return csvText.split('\n').slice(1).map(row => {
+                    const columns = row.split(',').map(col => col.trim());
+                    return {
+                        name: columns[0],
+                        platform: columns[1],
+                        achievements: columns[2],
+                        status: columns[3],
+                        thumbnail: columns[4] || getPlaceholderImage(columns[0])
+                    };
+                });
+            }
+
+            function getPlaceholderImage(gameName) {
+                return `https://via.placeholder.com/220x300/333/fff?text=${encodeURIComponent(gameName)}`;
+            }
+
+            function populatePlatformFilter(games) {
+                const platforms = [...new Set(games.map(game => game.platform))];
+                const filter = document.getElementById('platform-filter');
+                platforms.forEach(platform => {
+                    const option = document.createElement('option');
+                    option.value = platform;
+                    option.textContent = platform;
+                    filter.appendChild(option);
+                });
+            }
+
+            function displayGames(games) {
+                const gameList = document.getElementById('game-list');
+                gameList.innerHTML = '';
+                
+                games.forEach(game => {
+                    const card = document.createElement('div');
+                    card.className = 'game-card';
+                    card.innerHTML = `
+                        <img src="${game.thumbnail}" alt="${game.name}" onerror="handleImageError(this)">
+                        <h3>${game.name}</h3>
+                        <p> 
+                            ${game.platform in platformLogos ? 
+                                `<img class="platform-logo" src="${platformLogos[game.platform]}" alt="${game.platform}">` : 
+                                ''}
+                        </p>
+                        <p>Achievements: ${game.achievements || 'N/A'}</p>
+                        <p>Status: ${game.status || 'Unknown'}</p>
+                    `;
+                    gameList.appendChild(card);
+                });
+            }
+
+            document.getElementById('search').addEventListener('input', filterGames);
+            document.getElementById('platform-filter').addEventListener('change', filterGames);
+            document.getElementById('status-filter').addEventListener('change', filterGames);
+
+            async function filterGames() {
+                const searchTerm = document.getElementById('search').value.toLowerCase();
+                const platform = document.getElementById('platform-filter').value;
+                const status = document.getElementById('status-filter').value;
+
+                const response = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vS1kxT8zevrvrG_Xr7HarWj40Xj4kE_nSfMa6nJpO7cWDs8TTTWIHkQZ0UuDJkP7HVOQPQOb95aV7_v/pub?output=csv");
+                const csvText = await response.text();
+                const allGames = parseCSV(csvText);
+                
+                const filteredGames = allGames.filter(game => {
+                    const matchesSearch = game.name.toLowerCase().includes(searchTerm);
+                    const matchesPlatform = !platform || game.platform === platform;
+                    const matchesStatus = !status || game.status === status;
+                    return matchesSearch && matchesPlatform && matchesStatus;
+                });
+
+                displayGames(filteredGames);
+            }
+
+            fetchGames();
+        });
+    </script>
+</body>
+</html>

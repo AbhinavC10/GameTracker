@@ -31,6 +31,7 @@
             box-shadow: 0 4px 20px rgba(99, 102, 241, 0.2);
             margin-bottom: 2rem;
         }
+
         .profile-container {
             position: absolute;
             top: 15px;
@@ -52,7 +53,6 @@
             box-shadow: 0 8px 15px rgba(255, 255, 255, 0.2);
         }
 
-
         .username {
             font-size: 0.9rem;
             color: #E8BCB9;
@@ -69,6 +69,7 @@
 
         .filters {
             display: flex;
+            flex-wrap: wrap;
             justify-content: center;
             gap: 20px;
             padding: 1.5rem;
@@ -85,6 +86,8 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+            width: 100%;
+            max-width: 300px;
         }
 
         .filter-item label {
@@ -126,7 +129,7 @@
         }
 
         .platform-logo {
-           width: 35px !important;
+            width: 35px !important;
             height: 33px !important;
             object-fit: contain;
             position: absolute;
@@ -136,11 +139,12 @@
             padding: 4px;
             border-radius: 6px;
         }
+
         .platform-logo:hover {
             transform: scale(1.15);
             box-shadow: 0 8px 15px rgba(255, 255, 255, 0.2);
         }
-        
+
         input, select {
             padding: 12px 16px;
             border-radius: 8px;
@@ -186,14 +190,45 @@
             background: linear-gradient(90deg, var(--primary), var(--secondary));
             transition: width 0.5s ease;
         }
+
+        /* Additional responsive design adjustments */
+        @media (max-width: 768px) {
+            .filters {
+                flex-direction: column;
+            }
+
+            .game-list {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .profile-container {
+                top: 10px;
+                right: 10px;
+            }
+
+            .game-list {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-item {
+                max-width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
     <header>
         <h1>Game Tracker</h1>
-         <div class="profile-container">
+        <div class="profile-container">
             <img class="profile-pic" src="https://cdn.epicstream.com/images/ncavvykf/epicstream/390f60bc6c53522113d144bedaf48b34606eef28-1241x684.jpg?rect=0,16,1241,652&w=1200&h=630&auto=format" alt="Profile Picture">
             <div class="username">CHIKKU10</div>
+        </div>
     </header>
     <main>
         <div class="filters">
@@ -223,7 +258,7 @@
         // JavaScript for game fetching and filtering
         document.addEventListener("DOMContentLoaded", () => {
             const platformLogos = {
-             "Xbox": "https://th.bing.com/th/id/OIP.QYCkgA1sGtLaUmERoajEwQHaHa?rs=1&pid=ImgDetMain",
+                "Xbox": "https://th.bing.com/th/id/OIP.QYCkgA1sGtLaUmERoajEwQHaHa?rs=1&pid=ImgDetMain",
                 "EA": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKkBGqjpd6320pOoTUagLzuuonCmguCEDPiA&s",
                 "Steam": "https://static.vecteezy.com/system/resources/previews/020/336/432/non_2x/steam-logo-steam-icon-free-free-vector.jpg",
                 "Epic": "https://logos-world.net/wp-content/uploads/2021/12/Epic-Games-Emblem.png",
@@ -295,7 +330,7 @@
                         <p> 
                             ${game.platform in platformLogos ? 
                                 `<img class="platform-logo" src="${platformLogos[game.platform]}" alt="${game.platform}">` : 
-                                ''}
+                                '' }
                         </p>
                         <p>Achievements: ${game.achievements || 'N/A'}</p>
                         <p>Status: ${game.status || 'Unknown'}</p>

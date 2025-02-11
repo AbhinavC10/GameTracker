@@ -236,6 +236,24 @@
     opacity: 1;
 }
 
+.platinum-glow {
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+    filter: drop-shadow(0 0 6px rgba(255, 215, 2, 0.7));
+    animation: glow 2.2s infinite alternate;
+}
+
+@keyframes glow {
+    0% {
+        box-shadow: 0 0 6px rgba(255, 215, 0, 0.5);
+        filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.5));
+    }
+    100% {
+        box-shadow: 0 0 12px rgba(255, 215, 0, 0.9);
+        filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.9));
+    }
+}
+
+
 
         /* Additional responsive design adjustments */
         @media (max-width: 768px) {
@@ -387,26 +405,43 @@
 
 
             function displayGames(games) {
-                const gameList = document.getElementById('game-list');
-                gameList.innerHTML = '';
-                
-                games.forEach(game => {
-                    const card = document.createElement('div');
-                    card.className = 'game-card';
-                    card.innerHTML = `
-    <img src="${game.thumbnail}" alt="${game.name}" onerror="handleImageError(this)">
-    ${game.platform in platformLogos ? 
-        `<img class="platform-logo" src="${platformLogos[game.platform]}" alt="${game.platform}" data-tooltip="${game.platform}">` : ''}
-    ${game.trophies in trophyIcons ? 
-        `<img class="trophy-logo" src="${trophyIcons[game.trophies.toLowerCase()]}" alt="${game.trophies}" data-tooltip="${game.trophies.charAt(0).toUpperCase() + game.trophies.slice(1)} Trophy">` : ''}
-    <h3>${game.name}</h3>
-    <p>Achievements: ${game.achievements || 'N/A'}</p>
-    <p>Status: ${game.status || 'Unknown'}</p>
-`;
+    const gameList = document.getElementById('game-list');
+    gameList.innerHTML = ''; // Clear the previous content
 
-                    gameList.appendChild(card);
-                });
-            }
+    games.forEach(game => {
+        const card = document.createElement('div');
+        card.className = 'game-card';
+
+        // Create trophy icon element if applicable
+        let trophyHTML = '';
+        if (game.trophies && trophyIcons[game.trophies.toLowerCase()]) {
+            const trophyClass = game.trophies.toLowerCase() === "platinum" ? "trophy-logo platinum-glow" : "trophy-logo";
+            trophyHTML = `<img class="${trophyClass}" src="${trophyIcons[game.trophies.toLowerCase()]}" 
+                alt="${game.trophies}" data-tooltip="${game.trophies.charAt(0).toUpperCase() + game.trophies.slice(1)} Trophy">`;
+        }
+
+        // Create platform logo element if applicable
+        let platformHTML = '';
+        if (game.platform && platformLogos[game.platform]) {
+            platformHTML = `<img class="platform-logo" src="${platformLogos[game.platform]}" 
+                alt="${game.platform}" data-tooltip="${game.platform}">`;
+        }
+
+        // Set inner HTML of the card
+        card.innerHTML = `
+            <img src="${game.thumbnail}" alt="${game.name}" onerror="handleImageError(this)">
+            ${platformHTML}
+            ${trophyHTML}
+            <h3>${game.name}</h3>
+            <p>Achievements: ${game.achievements || 'N/A'}</p>
+            <p>Status: ${game.status || 'Unknown'}</p>
+        `;
+
+        // Append card to the game list container
+        gameList.appendChild(card);
+    });
+}
+
 
             document.getElementById('search').addEventListener('input', filterGames);
             document.getElementById('platform-filter').addEventListener('change', filterGames);

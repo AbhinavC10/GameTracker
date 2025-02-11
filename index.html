@@ -141,11 +141,11 @@
         }
         
         .trophy-logo {
-            width: 27px !important;
-            height: 25px !important;
+            width: 25px !important;
+            height: 23px !important;
             object-fit: contain;
             position: absolute;
-            top: 70px;
+            top: 340px;
             right: 20px;
             background: rgba(0, 0, 0, 0.6);
             padding: 4px;
@@ -206,6 +206,36 @@
             background: linear-gradient(90deg, var(--primary), var(--secondary));
             transition: width 0.5s ease;
         }
+        .tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    border-radius: 6px;
+    white-space: nowrap;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.platform-logo:hover::after,
+.trophy-logo:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    border-radius: 6px;
+    white-space: nowrap;
+    visibility: visible;
+    opacity: 1;
+}
+
 
         /* Additional responsive design adjustments */
         @media (max-width: 768px) {
@@ -283,6 +313,7 @@
         <div id="game-list" class="game-list"></div>
     </main>
     <script>
+        
         document.addEventListener("DOMContentLoaded", () => {
             const platformLogos = {
                 "Xbox": "https://th.bing.com/th/id/OIP.QYCkgA1sGtLaUmERoajEwQHaHa?rs=1&pid=ImgDetMain",
@@ -302,7 +333,7 @@
                 "bronze": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQsxfAmv24OdgXDbEz9dhuPCtqBjgA49F0SpS64MSZkLTh4fR1YFRJoZZ1IJ25BnqmNp4&usqp=CAU", 
                 "broken": "https://www.dictionary.com/e/wp-content/uploads/2024/03/20240318_mid_1920X1080.jpg"
             };
-
+    
             function handleImageError(img) {
                 img.onerror = null;
                 img.style.display = 'none';
@@ -363,15 +394,16 @@
                     const card = document.createElement('div');
                     card.className = 'game-card';
                     card.innerHTML = `
-                        <img src="${game.thumbnail}" alt="${game.name}" onerror="handleImageError(this)">
-                        ${game.platform in platformLogos ? 
-                            `<img class="platform-logo" src="${platformLogos[game.platform]}" alt="${game.platform}">` : ''}
-                        ${game.trophies in trophyIcons ? 
-                            `<img class="trophy-logo" src="${trophyIcons[game.trophies.toLowerCase()]}" alt="${game.trophies}">` : ''}
-                        <h3>${game.name}</h3>
-                        <p>Achievements: ${game.achievements || 'N/A'}</p>
-                        <p>Status: ${game.status || 'Unknown'}</p>
-                    `;
+    <img src="${game.thumbnail}" alt="${game.name}" onerror="handleImageError(this)">
+    ${game.platform in platformLogos ? 
+        `<img class="platform-logo" src="${platformLogos[game.platform]}" alt="${game.platform}" data-tooltip="${game.platform}">` : ''}
+    ${game.trophies in trophyIcons ? 
+        `<img class="trophy-logo" src="${trophyIcons[game.trophies.toLowerCase()]}" alt="${game.trophies}" data-tooltip="${game.trophies.charAt(0).toUpperCase() + game.trophies.slice(1)} Trophy">` : ''}
+    <h3>${game.name}</h3>
+    <p>Achievements: ${game.achievements || 'N/A'}</p>
+    <p>Status: ${game.status || 'Unknown'}</p>
+`;
+
                     gameList.appendChild(card);
                 });
             }
@@ -404,6 +436,46 @@
 
             fetchGames();
         });
+        
+        // Place it at the end of script.js
+document.addEventListener("DOMContentLoaded", () => {
+    const tooltip = document.createElement("div");
+    tooltip.classList.add("tooltip");
+    document.body.appendChild(tooltip);
+
+    function showTooltip(event) {
+        tooltip.textContent = event.target.getAttribute("data-tooltip");
+        tooltip.style.left = `${event.pageX + 10}px`;
+        tooltip.style.top = `${event.pageY + 10}px`;
+        tooltip.style.visibility = "visible";
+        tooltip.style.opacity = "1";
+    }
+
+    function hideTooltip() {
+        tooltip.style.visibility = "hidden";
+        tooltip.style.opacity = "0";
+    }
+
+    document.addEventListener("mouseover", (event) => {
+        if (event.target.classList.contains("platform-logo") || event.target.classList.contains("trophy-logo")) {
+            showTooltip(event);
+        }
+    });
+
+    document.addEventListener("mousemove", (event) => {
+        if (tooltip.style.visibility === "visible") {
+            tooltip.style.left = `${event.pageX + 10}px`;
+            tooltip.style.top = `${event.pageY + 10}px`;
+        }
+    });
+
+    document.addEventListener("mouseout", (event) => {
+        if (event.target.classList.contains("platform-logo") || event.target.classList.contains("trophy-logo")) {
+            hideTooltip();
+        }
+    });
+});
+
     </script>
 </body>
 </html>

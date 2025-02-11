@@ -139,12 +139,28 @@
             padding: 4px;
             border-radius: 6px;
         }
-
+        
+        .trophy-logo {
+            width: 27px !important;
+            height: 25px !important;
+            object-fit: contain;
+            position: absolute;
+            top: 70px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 4px;
+            border-radius: 6px;
+        }
+        
         .platform-logo:hover {
             transform: scale(1.15);
             box-shadow: 0 8px 15px rgba(255, 255, 255, 0.2);
         }
-
+        
+        .trophy-logo:hover {
+            transform: scale(1.15);
+            box-shadow: 0 8px 15px rgba(255, 255, 255, 0.2);
+        }
         input, select {
             padding: 12px 16px;
             border-radius: 8px;
@@ -161,7 +177,7 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
         }
 
-        input::placeholder {
+               input::placeholder {
             color: #64748b;
         }
 
@@ -220,6 +236,7 @@
                 max-width: 100%;
             }
         }
+
     </style>
 </head>
 <body>
@@ -251,14 +268,24 @@
                     <option value="Planning">Planning</option>
                 </select>
             </div>
+            <div class="filter-item">
+                <label for="trophy-filter">Trophy</label>
+                <select id="trophy-filter">
+                    <option value="">All Trophies</option>
+                    <option value="plat">Platinum</option>
+                    <option value="gold">Gold</option>
+                    <option value="silver">Silver</option>
+                    <option value="bronze">Bronze</option>
+                    <option value="broken">Broken</option>
+                </select>
+            </div>
         </div>
         <div id="game-list" class="game-list"></div>
     </main>
     <script>
-        // JavaScript for game fetching and filtering
         document.addEventListener("DOMContentLoaded", () => {
             const platformLogos = {
-                     "Xbox": "https://th.bing.com/th/id/OIP.QYCkgA1sGtLaUmERoajEwQHaHa?rs=1&pid=ImgDetMain",
+                "Xbox": "https://th.bing.com/th/id/OIP.QYCkgA1sGtLaUmERoajEwQHaHa?rs=1&pid=ImgDetMain",
                 "EA": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKkBGqjpd6320pOoTUagLzuuonCmguCEDPiA&s",
                 "Steam": "https://static.vecteezy.com/system/resources/previews/020/336/432/non_2x/steam-logo-steam-icon-free-free-vector.jpg",
                 "Epic": "https://logos-world.net/wp-content/uploads/2021/12/Epic-Games-Emblem.png",
@@ -266,6 +293,14 @@
                 "N": "https://png.pngtree.com/png-clipart/20210330/ourlarge/pngtree-pirate-game-icon-png-image_3170763.jpg",
                 "Playstation": "https://upload.wikimedia.org/wikipedia/commons/9/91/PlayStation_App_Icon.jpg",
                 "Nintendo": "https://i0.wp.com/mynintendonews.com/wp-content/uploads/2017/01/nintendo_switch_logo_proper.jpg?resize=930%2C620&ssl=1"
+            };
+
+            const trophyIcons = {
+                "plat": "https://d2t1xqejof9utc.cloudfront.net/screenshots/pics/0d879147d0eef059854dc4ef5dbd95b6/large.jpg",
+                "gold": "https://media.istockphoto.com/id/1025281982/vector/best-simple-champion-cup-winner-trophy-award-and-victory.jpg?s=612x612&w=0&k=20&c=PmRzQNF3nf1nQm8cslQoRh7Mzp5Ljgm-7FRt9vBFvfU=",
+                "silver": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQEw1RKcEH6fHsMR4P4z82oT_JI2vNSdGrx7w&s",
+                "bronze": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQsxfAmv24OdgXDbEz9dhuPCtqBjgA49F0SpS64MSZkLTh4fR1YFRJoZZ1IJ25BnqmNp4&usqp=CAU", 
+                "broken": "https://www.dictionary.com/e/wp-content/uploads/2024/03/20240318_mid_1920X1080.jpg"
             };
 
             function handleImageError(img) {
@@ -294,7 +329,8 @@
                         platform: columns[1],
                         achievements: columns[2],
                         status: columns[3],
-                        thumbnail: columns[4] || getPlaceholderImage(columns[0])
+                        trophies: columns[4],
+                        thumbnail: columns[5] || getPlaceholderImage(columns[0])
                     };
                 });
             }
@@ -313,11 +349,11 @@
                     filter.appendChild(option);
                 });
             }
-
             function calculateProgress(achievements) {
                 const match = achievements.match(/(\d+)\/(\d+)/);
                 return match ? (match[1]/match[2])*100 : 0;
             }
+
 
             function displayGames(games) {
                 const gameList = document.getElementById('game-list');
@@ -328,12 +364,11 @@
                     card.className = 'game-card';
                     card.innerHTML = `
                         <img src="${game.thumbnail}" alt="${game.name}" onerror="handleImageError(this)">
+                        ${game.platform in platformLogos ? 
+                            `<img class="platform-logo" src="${platformLogos[game.platform]}" alt="${game.platform}">` : ''}
+                        ${game.trophies in trophyIcons ? 
+                            `<img class="trophy-logo" src="${trophyIcons[game.trophies.toLowerCase()]}" alt="${game.trophies}">` : ''}
                         <h3>${game.name}</h3>
-                        <p> 
-                            ${game.platform in platformLogos ? 
-                                `<img class="platform-logo" src="${platformLogos[game.platform]}" alt="${game.platform}">` : 
-                                '' }
-                        </p>
                         <p>Achievements: ${game.achievements || 'N/A'}</p>
                         <p>Status: ${game.status || 'Unknown'}</p>
                     `;
@@ -344,11 +379,13 @@
             document.getElementById('search').addEventListener('input', filterGames);
             document.getElementById('platform-filter').addEventListener('change', filterGames);
             document.getElementById('status-filter').addEventListener('change', filterGames);
+            document.getElementById('trophy-filter').addEventListener('change', filterGames);
 
             async function filterGames() {
                 const searchTerm = document.getElementById('search').value.toLowerCase();
                 const platform = document.getElementById('platform-filter').value;
                 const status = document.getElementById('status-filter').value;
+                const trophy = document.getElementById('trophy-filter').value.toLowerCase();
 
                 const response = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vS1kxT8zevrvrG_Xr7HarWj40Xj4kE_nSfMa6nJpO7cWDs8TTTWIHkQZ0UuDJkP7HVOQPQOb95aV7_v/pub?output=csv");
                 const csvText = await response.text();
@@ -358,7 +395,8 @@
                     const matchesSearch = game.name.toLowerCase().includes(searchTerm);
                     const matchesPlatform = !platform || game.platform === platform;
                     const matchesStatus = !status || game.status === status;
-                    return matchesSearch && matchesPlatform && matchesStatus;
+                    const matchesTrophy = !trophy || (game.trophies && game.trophies.toLowerCase() === trophy);
+                    return matchesSearch && matchesPlatform && matchesStatus && matchesTrophy;
                 });
 
                 displayGames(filteredGames);
@@ -369,3 +407,4 @@
     </script>
 </body>
 </html>
+

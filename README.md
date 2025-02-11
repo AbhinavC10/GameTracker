@@ -6,12 +6,13 @@ Game Tracker is a web application designed to help users keep track of their gam
 ## Features
 - **Game List Display**: Shows a grid of games with thumbnails, platforms, achievements, and status.
 - **Search Functionality**: Users can search for games by name.
-- **Filter by Platform and Status**: Allows filtering based on platform and game completion status.
+- **Filter by Platform and Status**: Allows filtering based on platform, game completion status etc.
 - **Dynamic UI**: Animated elements with hover effects for an engaging experience.
 - **Responsive Design**: Works on desktop and mobile devices.
 - **Live Data Fetching**: Retrieves game data from a Google Spreadsheet in real time.
   
-![image](https://github.com/user-attachments/assets/4afac5bf-0a76-43ed-86c2-66a7b281a6e3)
+![image](https://github.com/user-attachments/assets/dd420b6a-590b-4ef8-85b3-6720c29cf35c)
+
 
 ## Technologies Used
 - **HTML, CSS, JavaScript**: Core web technologies for the front end.
